@@ -1,43 +1,18 @@
-import React, { useRef, useEffect } from "react";
-import {Chart} from "chart.js";
+import React from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
-const BarChart = () => {
-  const chartRef = useRef();
-
-  useEffect(() => {
-    const chart = new Chart(chartRef.current, {
-      type: "bar",
-      data: {
-        labels: ["Label 1", "Label 2", "Label 3"],
-        datasets: [
-          {
-            label: "Data 1",
-            data: [10, 20, 30],
-            backgroundColor: "rgba(75, 192, 192, 0.2)",
-            borderColor: "rgba(75, 192, 192, 1)",
-            borderWidth: 1,
-          },
-        ],
-      },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: true,
-          },
-        },
-      },
-    });
-
-    return () => {
-      chart.destroy();
-    };
-  }, []);
-
+const Chart = ({ data }) => {
   return (
-    <div>
-      <canvas ref={chartRef} />
-    </div>
+    <LineChart width={600} height={300} data={data}>
+      <XAxis dataKey="time" type="number" domain={['auto', 'auto']} tickFormatter={(unixTime) => new Date(unixTime).toLocaleTimeString()} />
+      <YAxis />
+      <CartesianGrid strokeDasharray="3 3" />
+      <Tooltip />
+      <Legend />
+      <Line type="monotone" dataKey="buy" stroke="#8884d8" activeDot={{ r: 8 }} />
+      <Line type="monotone" dataKey="sell" stroke="#82ca9d" />
+    </LineChart>
   );
 };
 
-export default BarChart;
+export default Chart;

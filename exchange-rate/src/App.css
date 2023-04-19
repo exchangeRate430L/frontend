@@ -1,10 +1,16 @@
+:root {
+  --primary-color: #0093d5;
+  --secondary-color: #49aaff;
+}
+
+
 body {
   background-color: #e9ebf0;
   font-family: Helvetica, Arial;
 }
 
 .header{
-  background-color: #0093d5;
+  background-color: var(--primary-color);
   padding: 10px;
 }
 
@@ -53,6 +59,30 @@ body {
   margin-top: 8px;
 }
 
+.button-bar {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.custom-button {
+  background-color: var(--primary-color);
+  color: #fff;
+  border-radius: 0;
+  border: none;
+  font-size: 1.2rem;
+  padding: 10px 20px;
+  margin-right: 10px;
+}
+
+.custom-button:hover {
+  cursor: pointer;
+  background-color: var(--secondary-color);
+}
+
+.custom-button:last-child {
+  margin-right: 0;
+}
 
 @media only screen and (min-width: 1400px) {
   .wrapper {

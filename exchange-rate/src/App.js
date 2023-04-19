@@ -10,6 +10,8 @@ import Alert from "@mui/material/Alert";
 import { getUserToken, saveUserToken, clearUserToken } from "./localStorage";
 import { useCallback } from "react";
 import { DataGrid } from "@mui/x-data-grid";
+import Chart from "./components/chartPage";
+import Bar from "./components/bar";
 
 import "./App.css";
 var SERVER_URL = "http://127.0.0.1:5000";
@@ -40,6 +42,7 @@ function App() {
   let [numSell, setNumSell] = useState(0);
   let [changeBuyUsdRate, setChangeBuyUsdRate] = useState(0);
   let [changeSellUsdRate, setChangeSellUsdRate] = useState(0);
+  let [dataChart, setDataChart] = useState([]);
 
   function fetchRates() {
     fetch(`${SERVER_URL}/exchangeRate`)
@@ -52,6 +55,7 @@ function App() {
         setNumSell(data.num_sell);
         setChangeBuyUsdRate(data.avg_change_lbp_usd);
         setChangeSellUsdRate(data.avg_change_usd_lbp);
+        setDataChart(data.combined_data);
         id = data.id;
       });
   }
@@ -298,52 +302,53 @@ function App() {
             sell USD price change:{" "}
             <span id="num-sell-usd">{sellUsdRate - changeSellUsdRate}</span>
           </h3>
-          {/* <h1>My Bar Chart</h1>
-            <BarChart/> */}
+          <h1>Price Change Chart (1D)</h1>
+          <Bar />
+          <Chart data={dataChart} />
         </div>
       )}
       {userToken !== null && (
         <div className="wrapper">
-        <h2>Record a recent transaction</h2>
-        <form name="transaction-entry">
-          <div className="amount-input">
-            <label htmlFor="lbp-amount">LBP Amount</label>
-            <TextField
-              id="lbp-amount"
-              type="number"
-              value={lbpInput}
-              onChange={(e) => setLbpInput(e.target.value)}
-            />
-          </div>
-          <div className="amount-input">
-            <label htmlFor="usd-amount">USD amount</label>
-            <TextField
-              id="usd-amount"
-              type="number"
-              value={usdInput}
-              onChange={(e) => setUsdInput(e.target.value)}
-            />
-          </div>
-        </form>
-        <select
-          id="transaction-type"
-          value={transactionType}
-          onChange={(e) => setTransactionType(e.target.value)}
-        >
-          <option value="usd-to-lbp">USD to LBP</option>
-          <option value="lbp-to-usd">LBP to USD</option>
-        </select>
-        <Button
-          id="add-button"
-          className="button"
-          type="button"
-          onClick={addItem}
-        >
-          Add
-        </Button>
-      </div>
+          <h2>Record a recent transaction</h2>
+          <form name="transaction-entry">
+            <div className="amount-input">
+              <label htmlFor="lbp-amount">LBP Amount</label>
+              <TextField
+                id="lbp-amount"
+                type="number"
+                value={lbpInput}
+                onChange={(e) => setLbpInput(e.target.value)}
+              />
+            </div>
+            <div className="amount-input">
+              <label htmlFor="usd-amount">USD amount</label>
+              <TextField
+                id="usd-amount"
+                type="number"
+                value={usdInput}
+                onChange={(e) => setUsdInput(e.target.value)}
+              />
+            </div>
+          </form>
+          <select
+            id="transaction-type"
+            value={transactionType}
+            onChange={(e) => setTransactionType(e.target.value)}
+          >
+            <option value="usd-to-lbp">USD to LBP</option>
+            <option value="lbp-to-usd">LBP to USD</option>
+          </select>
+          <Button
+            id="add-button"
+            className="button"
+            type="button"
+            onClick={addItem}
+          >
+            Add
+          </Button>
+        </div>
       )}
-      
+
       {userToken && (
         <div className="wrapper">
           <Typography variant="h5">Your Transactions</Typography>
