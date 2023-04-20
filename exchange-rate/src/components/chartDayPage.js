@@ -1,10 +1,10 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
-const Chart = ({ data }) => {
+const ChartDay = ({ data }) => {
   return (
     <LineChart width={600} height={300} data={data}>
-      <XAxis dataKey="time" type="number" domain={['auto', 'auto']} tickFormatter={(unixTime) => new Date(unixTime).toLocaleTimeString()} />
+      <XAxis dataKey="date" />
       <YAxis />
       <CartesianGrid strokeDasharray="3 3" />
       <Tooltip />
@@ -15,4 +15,6 @@ const Chart = ({ data }) => {
   );
 };
 
-export default Chart;
+
+
+export default ChartDay;

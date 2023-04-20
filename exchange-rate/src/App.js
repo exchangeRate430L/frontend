@@ -10,8 +10,11 @@ import Alert from "@mui/material/Alert";
 import { getUserToken, saveUserToken, clearUserToken } from "./localStorage";
 import { useCallback } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import Chart from "./components/chartPage";
-import Bar from "./components/bar";
+import ChartHour from "./components/chartHourPage";
+import ChartDay from "./components/chartDayPage";
+import ChartMin from "./components/chartMinPage";
+import React from "react";
+// import { Button } from "react-bootstrap";
 
 import "./App.css";
 var SERVER_URL = "http://127.0.0.1:5000";
@@ -42,8 +45,28 @@ function App() {
   let [numSell, setNumSell] = useState(0);
   let [changeBuyUsdRate, setChangeBuyUsdRate] = useState(0);
   let [changeSellUsdRate, setChangeSellUsdRate] = useState(0);
-  let [dataChart, setDataChart] = useState([]);
+  let [dataChartHour, setDataChartHour] = useState([]);
+  let [dataChartDay, setDataChartDay] = useState([]);
+  let [viewDay,setViewDay] = useState(true);
+  let [viewHour,setViewHour] = useState(false);
+  let [viewMin,setViewMin] = useState(false);
 
+  function handleClick(button) {
+    if (button === "day") {
+      setViewDay(true);
+      setViewHour(false);
+      setViewMin(false);
+    }
+    if (button === "hour") {
+      setViewHour(true);
+      setViewDay(false);
+      setViewMin(false);
+    } if (button === "min") {
+      setViewMin(true);
+      setViewHour(false);
+      setViewDay(false);
+    }
+  }
   function fetchRates() {
     fetch(`${SERVER_URL}/exchangeRate`)
       .then((response) => response.json())
@@ -53,9 +76,10 @@ function App() {
         setSellUsdRate(data.lbp_to_usd);
         setNumBuy(data.num_buy);
         setNumSell(data.num_sell);
-        setChangeBuyUsdRate(data.avg_change_lbp_usd);
-        setChangeSellUsdRate(data.avg_change_usd_lbp);
-        setDataChart(data.combined_data);
+        setChangeBuyUsdRate(data.change_lbp_usd);
+        setChangeSellUsdRate(data.change_usd_lbp);
+        setDataChartHour(data.combined_data_hour);
+        setDataChartDay(data.combined_data_day);
         id = data.id;
       });
   }
@@ -224,28 +248,137 @@ function App() {
       >
         <Alert severity="success">Success</Alert>
       </Snackbar>
+      {changeBuyUsdRate > 0 && (
+        <div className="wrapper">
+          <h2>Today's Exchange Rate</h2>
+          <p>LBP to USD Exchange Rate</p>
+          <h3>
+            Buy USD: <span id="buy-usd-rate-up">{buyUsdRate}</span>
+          </h3>
+          <h3>
+            Sell USD: <span id="sell-usd-rate">{sellUsdRate}</span>
+          </h3>
+          <hr />
+          {/* Here goes the calculator UI */}
+          <Button
+            color="inherit"
+            onClick={() => setViewCalculator(!viewCalculator)}
+          >
+            Calculator
+          </Button>
+          <Button
+            color="inherit"
+            onClick={() => setViewInsights(!viewInsights)}
+          >
+            Insights
+          </Button>
+        </div>
+      )}
+      {changeBuyUsdRate < 0 && (
+        <div className="wrapper">
+          <h2>Today's Exchange Rate</h2>
+          <p>LBP to USD Exchange Rate</p>
+          <h3>
+            Buy USD: <span id="buy-usd-rate-down">{buyUsdRate}</span>
+          </h3>
+          <h3>
+            Sell USD: <span id="sell-usd-rate">{sellUsdRate}</span>
+          </h3>
+          <hr />
+          {/* Here goes the calculator UI */}
+          <Button
+            color="inherit"
+            onClick={() => setViewCalculator(!viewCalculator)}
+          >
+            Calculator
+          </Button>
+          <Button
+            color="inherit"
+            onClick={() => setViewInsights(!viewInsights)}
+          >
+            Insights
+          </Button>
+        </div>
+      )}
 
-      <div className="wrapper">
-        <h2>Today's Exchange Rate</h2>
-        <p>LBP to USD Exchange Rate</p>
-        <h3>
-          Buy USD: <span id="buy-usd-rate">{buyUsdRate}</span>
-        </h3>
-        <h3>
-          Sell USD: <span id="sell-usd-rate">{sellUsdRate}</span>
-        </h3>
-        <hr />
-        {/* Here goes the calculator UI */}
-        <Button
-          color="inherit"
-          onClick={() => setViewCalculator(!viewCalculator)}
-        >
-          Calculator
-        </Button>
-        <Button color="inherit" onClick={() => setViewInsights(!viewInsights)}>
-          Insights
-        </Button>
-      </div>
+      {changeSellUsdRate < 0 && (
+        <div className="wrapper">
+          <h2>Today's Exchange Rate</h2>
+          <p>LBP to USD Exchange Rate</p>
+          <h3>
+            Buy USD: <span id="buy-usd-rate">{buyUsdRate}</span>
+          </h3>
+          <h3>
+            Sell USD: <span id="sell-usd-rate-down">{sellUsdRate}</span>
+          </h3>
+          <hr />
+          {/* Here goes the calculator UI */}
+          <Button
+            color="inherit"
+            onClick={() => setViewCalculator(!viewCalculator)}
+          >
+            Calculator
+          </Button>
+          <Button
+            color="inherit"
+            onClick={() => setViewInsights(!viewInsights)}
+          >
+            Insights
+          </Button>
+        </div>
+      )}
+      {changeSellUsdRate > 0 && (
+        <div className="wrapper">
+          <h2>Today's Exchange Rate</h2>
+          <p>LBP to USD Exchange Rate</p>
+          <h3>
+            Buy USD: <span id="buy-usd-rate">{buyUsdRate}</span>
+          </h3>
+          <h3>
+            Sell USD: <span id="sell-usd-rate-up">{sellUsdRate}</span>
+          </h3>
+          <hr />
+          {/* Here goes the calculator UI */}
+          <Button
+            color="inherit"
+            onClick={() => setViewCalculator(!viewCalculator)}
+          >
+            Calculator
+          </Button>
+          <Button
+            color="inherit"
+            onClick={() => setViewInsights(!viewInsights)}
+          >
+            Insights
+          </Button>
+        </div>
+      )}
+      {(changeBuyUsdRate === 0) & (changeSellUsdRate === 0) && (
+        <div className="wrapper">
+          <h2>Today's Exchange Rate</h2>
+          <p>LBP to USD Exchange Rate</p>
+          <h3>
+            Buy USD: <span id="buy-usd-rate">{buyUsdRate}</span>
+          </h3>
+          <h3>
+            Sell USD: <span id="sell-usd-rate">{sellUsdRate}</span>
+          </h3>
+          <hr />
+          {/* Here goes the calculator UI */}
+          <Button
+            color="inherit"
+            onClick={() => setViewCalculator(!viewCalculator)}
+          >
+            Calculator
+          </Button>
+          <Button
+            color="inherit"
+            onClick={() => setViewInsights(!viewInsights)}
+          >
+            Insights
+          </Button>
+        </div>
+      )}
 
       {viewCalculator === true && (
         <div className="wrapper">
@@ -296,15 +429,51 @@ function App() {
           </h3>
           <h3>
             buy USD price change:{" "}
-            <span id="num-buy-usd">{buyUsdRate - changeBuyUsdRate}</span>
+            <span id="num-buy-usd">{changeBuyUsdRate}</span>
           </h3>
           <h3>
             sell USD price change:{" "}
-            <span id="num-sell-usd">{sellUsdRate - changeSellUsdRate}</span>
+            <span id="num-sell-usd">{changeSellUsdRate}</span>
           </h3>
-          <h1>Price Change Chart (1D)</h1>
-          <Bar />
-          <Chart data={dataChart} />
+            <div className="button-bar">
+              <Button
+                onClick={() => handleClick("day")}
+                className="custom-button"
+              >
+                1 Day
+              </Button>
+              <Button
+                onClick={() => handleClick("hour")}
+                className="custom-button"
+              >
+                1 Hour
+              </Button>
+              <Button
+                onClick={() => handleClick("min")}
+                className="custom-button"
+              >
+                30 Minutes
+              </Button>
+            </div>
+            {viewDay === true && (
+              <div>
+                <h1>Price Change Chart (1D)</h1>
+              <ChartDay data={dataChartDay} />
+              </div>
+            )}
+            {viewHour === true && (
+              <div>
+                <h1>Price Change Chart (1H)</h1>
+              <ChartHour data={dataChartHour} />
+              </div>
+            )}
+            {viewMin === true && (
+              <div>
+                <h1>Price Change Chart (30 Mins)</h1>
+              <ChartMin data={dataChartHour} />
+              </div>
+            )}
+          
         </div>
       )}
       {userToken !== null && (

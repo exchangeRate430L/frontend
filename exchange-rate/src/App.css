@@ -3,6 +3,21 @@
   --secondary-color: #49aaff;
 }
 
+#buy-usd-rate-up{
+  color: green;
+}
+
+#buy-usd-rate-down{
+  color: red;
+}
+
+#sell-usd-rate-up{
+  color: green;
+}
+
+#sell-usd-rate-down{
+  color: red;
+}
 
 body {
   background-color: #e9ebf0;
