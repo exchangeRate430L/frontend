@@ -26,7 +26,7 @@ body {
 
 .header{
   background-color: var(--primary-color);
-  padding: 10px;
+  padding: 1rem;
 }
 
 .header h1 {
@@ -34,13 +34,13 @@ body {
 }
 
 .wrapper {
-  margin-top: 50px;
-  margin-bottom: 50px;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
   background-color: #fff;
-  border-radius: 15px;
+  border-radius: 1rem;
   margin-left: auto;
   margin-right: auto;
-  padding: 30px;
+  padding: 1.75rem;
 }
 .wrapper p {
   font-style: italic;
@@ -51,13 +51,13 @@ body {
   display: block;
   }
 .wrapper input {
-  padding: 3px 6px;
+  padding: 0.2rem 0.4rem;
 }
 .amount-input {
-  margin-bottom: 10px;
+  margin-bottom: 1rem;
 }
 .wrapper hr {
-  margin: 40px auto;
+  margin: 2rem auto;
 }
 .wrapper select {
   display: block;
@@ -71,13 +71,13 @@ body {
   }
 
 #add-button{
-  margin-top: 8px;
+  margin-top: 0.8rem;
 }
 
 .button-bar {
   display: flex;
   justify-content: center;
-  margin: 16px 0;
+  margin: 1rem 0;
 }
 
 .custom-button {
@@ -86,8 +86,8 @@ body {
   border-radius: 0;
   border: none;
   font-size: 1.2rem;
-  padding: 10px 20px;
-  margin-right: 10px;
+  padding: 0.8rem 1.5rem;
+  margin-right: 0.8rem;
 }
 
 .custom-button:hover {
@@ -104,7 +104,7 @@ body {
   width: 50%;
   }
   .wrapper input {
-  width: 600px;
+  width: 40rem;
   }
 }
 @media only screen and (max-width: 1399px) and (min-width: 750px) {
@@ -112,6 +112,6 @@ body {
   width: 75%;
   }
   .wrapper input {
-  width: 400px;
+  width: 30rem;
   }
 }

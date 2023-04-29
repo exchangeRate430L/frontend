@@ -7,3 +7,12 @@ export function saveUserToken(userToken) {
     export function clearUserToken() {
     return localStorage.removeItem("TOKEN");
     }
+export function saveUserRole(userRole) {
+    localStorage.setItem("Role", userRole);
+    }
+    export function getUserRole() {
+        return localStorage.getItem("Role");
+        }
+    export function clearUserRole() {
+        return localStorage.removeItem("Role");
+        }

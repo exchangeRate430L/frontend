@@ -7,7 +7,14 @@ import Button from "@mui/material/Button";
 import UserCredentialsDialog from "./UserCredentialsDialog/UserCredentialsDialog";
 import { Snackbar, TextField } from "@mui/material";
 import Alert from "@mui/material/Alert";
-import { getUserToken, saveUserToken, clearUserToken } from "./localStorage";
+import {
+  getUserToken,
+  saveUserToken,
+  clearUserToken,
+  getUserRole,
+  saveUserRole,
+  clearUserRole,
+} from "./localStorage";
 import { useCallback } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import ChartHour from "./components/chartHourPage";
@@ -35,6 +42,7 @@ function App() {
   let [usdInput, setUsdInput] = useState("");
   let [transactionType, setTransactionType] = useState("usd-to-lbp");
   let [userToken, setUserToken] = useState(getUserToken());
+  let [userRole, setUserRole] = useState(getUserRole());
   let [authState, setAuthState] = useState(States.PENDING);
   let [lbpAmount, setLbpAmount] = useState("");
   let [usdAmount, setUsdAmount] = useState("");
@@ -47,9 +55,12 @@ function App() {
   let [changeSellUsdRate, setChangeSellUsdRate] = useState(0);
   let [dataChartHour, setDataChartHour] = useState([]);
   let [dataChartDay, setDataChartDay] = useState([]);
-  let [viewDay,setViewDay] = useState(true);
-  let [viewHour,setViewHour] = useState(false);
-  let [viewMin,setViewMin] = useState(false);
+  let [viewDay, setViewDay] = useState(true);
+  let [viewHour, setViewHour] = useState(false);
+  let [viewMin, setViewMin] = useState(false);
+  let [usdBalance, setUsdBalance] = useState(0);
+  let [lbpBalance, setLbpBalance] = useState(0);
+  let [userId, setUserId] = useState(0);
 
   function handleClick(button) {
     if (button === "day") {
@@ -61,7 +72,8 @@ function App() {
       setViewHour(true);
       setViewDay(false);
       setViewMin(false);
-    } if (button === "min") {
+    }
+    if (button === "min") {
       setViewMin(true);
       setViewHour(false);
       setViewDay(false);
@@ -84,6 +96,34 @@ function App() {
       });
   }
   useEffect(fetchRates, []);
+
+  // function fixBalance(userId, usdBalance, lbpBalance) {
+  //   if (transactionType === "usd-to-lbp") {
+  //     setUsdBalance(parseInt(usdBalance) - parseInt(usdInput));
+  //     setLbpBalance(parseInt(lbpBalance) + parseInt(lbpInput));
+  //   } else {
+  //     setUsdBalance(parseInt(usdBalance) + parseInt(usdInput));
+  //     setLbpBalance(parseInt(lbpBalance) - parseInt(lbpInput));
+  //   }
+  //   fetch(`/user/${userId}`, {
+  //     method: 'PUT',
+  //     headers: {
+  //       'Content-Type': 'application/json'
+  //     },
+  //     body: JSON.stringify({
+  //       usd_balance: usdBalance,
+  //       lbp_balance: lbpBalance
+  //     })
+  //   })
+  //   .then(response => response.json())
+  //   .then(data => {
+  //     console.log('Updated user:', data);
+  //     setUsdBalance(data.usd_balance);
+  //     setLbpBalance(data.lbp_balance);
+  //     // Do something with the updated user data
+  //   })
+  //   .catch(error => console.error('Error updating user:', error));
+  // }
   function addItem() {
     if (lbpInput !== 0 && usdInput !== 0) {
       if (transactionType === "usd-to-lbp") {
@@ -146,7 +186,9 @@ function App() {
   }
   function logout() {
     setUserToken(null);
+    setUserRole(null);
     clearUserToken();
+    clearUserRole();
   }
   function login(username, password) {
     return fetch(`${SERVER_URL}/authentication`, {
@@ -164,10 +206,15 @@ function App() {
       .then((body) => {
         setAuthState(States.USER_AUTHENTICATED);
         setUserToken(body.token);
+        setUserRole(body.role);
         saveUserToken(body.token);
+        saveUserRole(body.role);
+        setUsdBalance(body.usd_balance);
+        setLbpBalance(body.lbp_balance);
+        setUserId(body.user_id);
       });
   }
-  function createUser(username, password) {
+  function createUser(username, password, role, lbpBalance, usdBalance) {
     return fetch(`${SERVER_URL}/user`, {
       method: "POST",
       headers: {
@@ -176,6 +223,9 @@ function App() {
       body: JSON.stringify({
         user_name: username,
         password: password,
+        role: role,
+        usd_balance: usdBalance,
+        lbp_balance: lbpBalance,
       }),
     }).then((response) => login(username, password));
   }
@@ -394,7 +444,13 @@ function App() {
                 id="lbp-amount"
                 type="number"
                 value={lbpAmount}
-                onChange={(e) => setLbpAmount(e.target.value)}
+                onChange={(e) => {
+                  if (e.target.value > 0) {
+                    setLbpAmount(e.target.value);
+                  } else {
+                    setLbpAmount("");
+                  }
+                }}
               />
             </div>
           </form>
@@ -410,7 +466,13 @@ function App() {
                 id="usd-amount"
                 type="number"
                 value={usdAmount}
-                onChange={(e) => setUsdAmount(e.target.value)}
+                onChange={(e) => {
+                  if (e.target.value > 0) {
+                    setUsdAmount(e.target.value);
+                  } else {
+                    setUsdAmount("");
+                  }
+                }}
               />
             </div>
           </form>
@@ -435,45 +497,44 @@ function App() {
             sell USD price change:{" "}
             <span id="num-sell-usd">{changeSellUsdRate}</span>
           </h3>
-            <div className="button-bar">
-              <Button
-                onClick={() => handleClick("day")}
-                className="custom-button"
-              >
-                1 Day
-              </Button>
-              <Button
-                onClick={() => handleClick("hour")}
-                className="custom-button"
-              >
-                1 Hour
-              </Button>
-              <Button
-                onClick={() => handleClick("min")}
-                className="custom-button"
-              >
-                30 Minutes
-              </Button>
-            </div>
-            {viewDay === true && (
-              <div>
-                <h1>Price Change Chart (1D)</h1>
+          <div className="button-bar">
+            <Button
+              onClick={() => handleClick("day")}
+              className="custom-button"
+            >
+              1 Day
+            </Button>
+            <Button
+              onClick={() => handleClick("hour")}
+              className="custom-button"
+            >
+              1 Hour
+            </Button>
+            <Button
+              onClick={() => handleClick("min")}
+              className="custom-button"
+            >
+              30 Minutes
+            </Button>
+          </div>
+          {viewDay === true && (
+            <div className="wrrapper">
+              <h1>Price Change Chart (1D)</h1>
               <ChartDay data={dataChartDay} />
-              </div>
-            )}
-            {viewHour === true && (
-              <div>
-                <h1>Price Change Chart (1H)</h1>
+            </div>
+          )}
+          {viewHour === true && (
+            <div className="wrapper">
+              <h1>Price Change Chart (1H)</h1>
               <ChartHour data={dataChartHour} />
-              </div>
-            )}
-            {viewMin === true && (
-              <div>
-                <h1>Price Change Chart (30 Mins)</h1>
+            </div>
+          )}
+          {viewMin === true && (
+            <div>
+              <h1>Price Change Chart (30 Mins)</h1>
               <ChartMin data={dataChartHour} />
-              </div>
-            )}
-          
+            </div>
+          )}
         </div>
       )}
       {userToken !== null && (
@@ -511,10 +572,21 @@ function App() {
             id="add-button"
             className="button"
             type="button"
-            onClick={addItem}
+            onClick={() => {
+              addItem();
+              // fixBalance(userId, usdBalance, lbpBalance);
+            }}
           >
             Add
           </Button>
+        </div>
+      )}
+
+      {userRole === "Staff" && (
+        <div className="wrapper">
+          <h2> Balance </h2>
+          <p>USD Balance: {usdBalance}</p>
+          <p>LBP Balance: {lbpBalance}</p>
         </div>
       )}
 
