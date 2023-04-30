@@ -28,9 +28,9 @@ import ChartHour from "./components/chartHourPage";
 import ChartDay from "./components/chartDayPage";
 import ChartMin from "./components/chartMinPage";
 import React from "react";
-// import { Button } from "react-bootstrap";
-
 import "./App.css";
+import ExportExcel from "./components/excelexport";
+
 var SERVER_URL = "http://127.0.0.1:5000";
 var id = 0;
 var booleanTrans = 0;
@@ -41,6 +41,8 @@ const States = {
   USER_LOG_IN: "USER_LOG_IN",
   USER_AUTHENTICATED: "USER_AUTHENTICATED",
 };
+
+
 
 function App() {
   let [buyUsdRate, setBuyUsdRate] = useState(null);
@@ -67,7 +69,6 @@ function App() {
   let [viewMin, setViewMin] = useState(false);
   let [usdBalance, setUsdBalance] = useState(getUserUsdBalance());
   let [lbpBalance, setLbpBalance] = useState(getUserLbpBalance());
-  // let [userId, setUserId] = useState(0);
 
   function handleClick(button) {
     if (button === "day") {
@@ -99,41 +100,11 @@ function App() {
         setChangeSellUsdRate(data.change_usd_lbp);
         setDataChartHour(data.combined_data_hour);
         setDataChartDay(data.combined_data_day);
-        getBalance();
-        // setUsdBalance(getUserUsdBalance);
-        // setLbpBalance(getUserLbpBalance);
         id = data.id;
       });
   }
   useEffect(fetchRates, []);
 
-  // function fixBalance(userId, usdBalance, lbpBalance) {
-  //   if (transactionType === "usd-to-lbp") {
-  //     setUsdBalance(parseInt(usdBalance) - parseInt(usdInput));
-  //     setLbpBalance(parseInt(lbpBalance) + parseInt(lbpInput));
-  //   } else {
-  //     setUsdBalance(parseInt(usdBalance) + parseInt(usdInput));
-  //     setLbpBalance(parseInt(lbpBalance) - parseInt(lbpInput));
-  //   }
-  //   fetch(`/user/${userId}`, {
-  //     method: 'PUT',
-  //     headers: {
-  //       'Content-Type': 'application/json'
-  //     },
-  //     body: JSON.stringify({
-  //       usd_balance: usdBalance,
-  //       lbp_balance: lbpBalance
-  //     })
-  //   })
-  //   .then(response => response.json())
-  //   .then(data => {
-  //     console.log('Updated user:', data);
-  //     setUsdBalance(data.usd_balance);
-  //     setLbpBalance(data.lbp_balance);
-  //     // Do something with the updated user data
-  //   })
-  //   .catch(error => console.error('Error updating user:', error));
-  // }
   function addItem() {
     if (lbpInput !== 0 && usdInput !== 0) {
       if (transactionType === "usd-to-lbp") {
@@ -164,6 +135,7 @@ function App() {
             console.log("Success:", data);
             fetchRates();
             fetchUserTransactions();
+            getBalance();
           })
 
           .catch((error) => {
@@ -223,8 +195,6 @@ function App() {
         setUserRole(body.role);
         saveUserToken(body.token);
         saveUserRole(body.role);
-        // setUserId(body.user_id);
-        
       })
       .then(() => window.location.reload());
   }
@@ -612,7 +582,6 @@ function App() {
             type="button"
             onClick={() => {
               addItem();
-              // fixBalance(userId, usdBalance, lbpBalance);
             }}
           >
             Add
@@ -636,6 +605,7 @@ function App() {
             rowsPerPageOptions={[5]}
             autoHeight
           />
+          <ExportExcel excelData={userTransactions} fileName={"Excel Export"} />
         </div>
       )}
       <script src="script.js"></script>
