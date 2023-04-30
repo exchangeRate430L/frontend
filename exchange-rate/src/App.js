@@ -5,6 +5,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import UserCredentialsDialog from "./UserCredentialsDialog/UserCredentialsDialog";
+import UserCredentialsDialogRegister from "./UserCredentialsDialog/UserCredentialsDialogRegister";
 import { Snackbar, TextField } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import {
@@ -14,6 +15,12 @@ import {
   getUserRole,
   saveUserRole,
   clearUserRole,
+  saveUserUsdBalance,
+  saveUserLbpBalance,
+  getUserUsdBalance,
+  getUserLbpBalance,
+  clearUserLbpBalance,
+  clearUserUsdBalance,
 } from "./localStorage";
 import { useCallback } from "react";
 import { DataGrid } from "@mui/x-data-grid";
@@ -58,9 +65,9 @@ function App() {
   let [viewDay, setViewDay] = useState(true);
   let [viewHour, setViewHour] = useState(false);
   let [viewMin, setViewMin] = useState(false);
-  let [usdBalance, setUsdBalance] = useState(0);
-  let [lbpBalance, setLbpBalance] = useState(0);
-  let [userId, setUserId] = useState(0);
+  let [usdBalance, setUsdBalance] = useState(getUserUsdBalance());
+  let [lbpBalance, setLbpBalance] = useState(getUserLbpBalance());
+  // let [userId, setUserId] = useState(0);
 
   function handleClick(button) {
     if (button === "day") {
@@ -92,6 +99,9 @@ function App() {
         setChangeSellUsdRate(data.change_usd_lbp);
         setDataChartHour(data.combined_data_hour);
         setDataChartDay(data.combined_data_day);
+        getBalance();
+        // setUsdBalance(getUserUsdBalance);
+        // setLbpBalance(getUserLbpBalance);
         id = data.id;
       });
   }
@@ -189,6 +199,10 @@ function App() {
     setUserRole(null);
     clearUserToken();
     clearUserRole();
+    setLbpBalance(null);
+    setUsdBalance(null);
+    clearUserLbpBalance();
+    clearUserUsdBalance();
   }
   function login(username, password) {
     return fetch(`${SERVER_URL}/authentication`, {
@@ -209,10 +223,10 @@ function App() {
         setUserRole(body.role);
         saveUserToken(body.token);
         saveUserRole(body.role);
-        setUsdBalance(body.usd_balance);
-        setLbpBalance(body.lbp_balance);
-        setUserId(body.user_id);
-      });
+        // setUserId(body.user_id);
+        
+      })
+      .then(() => window.location.reload());
   }
   function createUser(username, password, role, lbpBalance, usdBalance) {
     return fetch(`${SERVER_URL}/user`, {
@@ -238,11 +252,28 @@ function App() {
       .then((response) => response.json())
       .then((transactions) => setUserTransactions(transactions));
   }, [userToken]);
+
+  const getBalance = useCallback(() => {
+    fetch(`${SERVER_URL}/balance`, {
+      headers: {
+        Authorization: `bearer ${userToken}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((balance) => {
+        setUsdBalance(balance.usd_balance);
+        setLbpBalance(balance.lbp_balance);
+        saveUserUsdBalance(balance.usd_balance);
+        saveUserLbpBalance(balance.lbp_balance);
+      });
+  }, [userToken]);
+
   useEffect(() => {
     if (userToken) {
       fetchUserTransactions();
+      getBalance();
     }
-  }, [fetchUserTransactions, userToken]);
+  }, [fetchUserTransactions, getBalance, userToken]);
   return (
     <div className="App">
       <div className="header">
@@ -273,7 +304,7 @@ function App() {
         </AppBar>
       </div>
 
-      <UserCredentialsDialog
+      <UserCredentialsDialogRegister
         open={authState === States.USER_CREATION}
         onClose={() => setAuthState(States.PENDING)}
         onSubmit={createUser}
@@ -322,6 +353,13 @@ function App() {
           >
             Insights
           </Button>
+        </div>
+      )}
+      {userRole === "Staff" && (
+        <div className="wrapper">
+          <h2> Balance </h2>
+          <p>USD Balance: ${usdBalance}</p>
+          <p>LBP Balance: {lbpBalance}L.L</p>
         </div>
       )}
       {changeBuyUsdRate < 0 && (
@@ -579,14 +617,6 @@ function App() {
           >
             Add
           </Button>
-        </div>
-      )}
-
-      {userRole === "Staff" && (
-        <div className="wrapper">
-          <h2> Balance </h2>
-          <p>USD Balance: {usdBalance}</p>
-          <p>LBP Balance: {lbpBalance}</p>
         </div>
       )}
 
