@@ -69,6 +69,8 @@ function App() {
   let [viewMin, setViewMin] = useState(false);
   let [usdBalance, setUsdBalance] = useState(getUserUsdBalance());
   let [lbpBalance, setLbpBalance] = useState(getUserLbpBalance());
+  let [userName, setUserName] = useState("");
+  let [userTransaction, setUserTransaction] = useState("");
 
   function handleClick(button) {
     if (button === "day") {
@@ -118,6 +120,7 @@ function App() {
         usd_amount: parseInt(usdInput),
         lbp_amount: parseInt(lbpInput),
         usd_to_lbp: booleanTrans,
+        to_user_id: parseInt(userTransaction),
       };
 
       console.log(data);
@@ -162,6 +165,7 @@ function App() {
 
       setLbpInput("");
       setUsdInput("");
+      setUserTransaction("");
     } else {
       console.log("fill values!");
     }
@@ -171,6 +175,7 @@ function App() {
     setUserRole(null);
     clearUserToken();
     clearUserRole();
+    setUserName(null);
     setLbpBalance(null);
     setUsdBalance(null);
     clearUserLbpBalance();
@@ -195,8 +200,7 @@ function App() {
         setUserRole(body.role);
         saveUserToken(body.token);
         saveUserRole(body.role);
-      })
-      .then(() => window.location.reload());
+      });
   }
   function createUser(username, password, role, lbpBalance, usdBalance) {
     return fetch(`${SERVER_URL}/user`, {
@@ -233,6 +237,7 @@ function App() {
       .then((balance) => {
         setUsdBalance(balance.usd_balance);
         setLbpBalance(balance.lbp_balance);
+        setUserName(balance.user_name);
         saveUserUsdBalance(balance.usd_balance);
         saveUserLbpBalance(balance.lbp_balance);
       });
@@ -250,10 +255,15 @@ function App() {
         <AppBar position="static">
           <Toolbar classes={{ root: "nav" }}>
             <Typography variant="h5">LBP Exchange Tool</Typography>
+            {userName!==null && (<Typography variant="h4">{userName}</Typography>)}
+            
             {userToken !== null ? (
-              <Button color="inherit" onClick={logout}>
+              <div>
+                <Button color="inherit" onClick={logout}>
                 Logout
               </Button>
+              </div>
+              
             ) : (
               <div>
                 <Button
@@ -299,7 +309,14 @@ function App() {
       >
         <Alert severity="success">Success</Alert>
       </Snackbar>
-      {changeBuyUsdRate > 0 && (
+      {userToken!==null && (
+        <div className="wrapper">
+        <h2> Balance </h2>
+        <p>USD Balance: ${usdBalance}</p>
+        <p>LBP Balance: {lbpBalance}L.L</p>
+      </div>
+      )}
+      {(changeBuyUsdRate>0) && (changeSellUsdRate===0) && (
         <div className="wrapper">
           <h2>Today's Exchange Rate</h2>
           <p>LBP to USD Exchange Rate</p>
@@ -325,14 +342,7 @@ function App() {
           </Button>
         </div>
       )}
-      {userRole === "Staff" && (
-        <div className="wrapper">
-          <h2> Balance </h2>
-          <p>USD Balance: ${usdBalance}</p>
-          <p>LBP Balance: {lbpBalance}L.L</p>
-        </div>
-      )}
-      {changeBuyUsdRate < 0 && (
+      {(changeBuyUsdRate<0) && (changeSellUsdRate===0) && (
         <div className="wrapper">
           <h2>Today's Exchange Rate</h2>
           <p>LBP to USD Exchange Rate</p>
@@ -358,8 +368,35 @@ function App() {
           </Button>
         </div>
       )}
+        
+      {(changeBuyUsdRate <0) && (changeSellUsdRate <0) && (
+        <div className="wrapper">
+          <h2>Today's Exchange Rate</h2>
+          <p>LBP to USD Exchange Rate</p>
+          <h3>
+            Buy USD: <span id="buy-usd-rate-down">{buyUsdRate}</span>
+          </h3>
+          <h3>
+            Sell USD: <span id="sell-usd-rate-down">{sellUsdRate}</span>
+          </h3>
+          <hr />
+          {/* Here goes the calculator UI */}
+          <Button
+            color="inherit"
+            onClick={() => setViewCalculator(!viewCalculator)}
+          >
+            Calculator
+          </Button>
+          <Button
+            color="inherit"
+            onClick={() => setViewInsights(!viewInsights)}
+          >
+            Insights
+          </Button>
+        </div>
+      )}
 
-      {changeSellUsdRate < 0 && (
+      {(changeSellUsdRate <0) && (changeBuyUsdRate ===0) && (
         <div className="wrapper">
           <h2>Today's Exchange Rate</h2>
           <p>LBP to USD Exchange Rate</p>
@@ -385,7 +422,7 @@ function App() {
           </Button>
         </div>
       )}
-      {changeSellUsdRate > 0 && (
+      {(changeSellUsdRate >0) && (changeBuyUsdRate ===0) && (
         <div className="wrapper">
           <h2>Today's Exchange Rate</h2>
           <p>LBP to USD Exchange Rate</p>
@@ -411,7 +448,7 @@ function App() {
           </Button>
         </div>
       )}
-      {(changeBuyUsdRate === 0) & (changeSellUsdRate === 0) && (
+      {(changeBuyUsdRate ===0) && (changeSellUsdRate ===0) && (
         <div className="wrapper">
           <h2>Today's Exchange Rate</h2>
           <p>LBP to USD Exchange Rate</p>
@@ -532,7 +569,7 @@ function App() {
             </div>
           )}
           {viewHour === true && (
-            <div className="wrapper">
+            <div>
               <h1>Price Change Chart (1H)</h1>
               <ChartHour data={dataChartHour} />
             </div>
@@ -549,6 +586,15 @@ function App() {
         <div className="wrapper">
           <h2>Record a recent transaction</h2>
           <form name="transaction-entry">
+          <div className="amount-input">
+              <label htmlFor="to-user">To: User Id</label>
+              <TextField
+                id="to-user"
+                type="number"
+                value={userTransaction}
+                onChange={(e) => setUserTransaction(e.target.value)}
+              />
+            </div>
             <div className="amount-input">
               <label htmlFor="lbp-amount">LBP Amount</label>
               <TextField
@@ -599,13 +645,16 @@ function App() {
               { field: "usd_to_lbp", headerName: "usd_to_lbp" },
               { field: "added_date", headerName: "added_date" },
               { field: "user_id", headerName: "user_id" },
+              { field: "to_user_id", headerName: "to_user_id" },
             ]}
             rows={userTransactions}
             pageSize={5}
             rowsPerPageOptions={[5]}
             autoHeight
           />
+          {userRole === "Staff" && (
           <ExportExcel excelData={userTransactions} fileName={"Excel Export"} />
+          )}
         </div>
       )}
       <script src="script.js"></script>

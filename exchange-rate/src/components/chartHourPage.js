@@ -3,7 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'r
 
 const ChartHour = ({ data }) => {
   return (
-    <LineChart width={600} height={300} data={data}>
+    <LineChart width={750} height={450} data={data}>
       <XAxis dataKey="time" type="number" domain={['auto', 'auto']} tickFormatter={(unixTime) => new Date(unixTime).toLocaleTimeString()} />
       <YAxis />
       <CartesianGrid strokeDasharray="3 3" />

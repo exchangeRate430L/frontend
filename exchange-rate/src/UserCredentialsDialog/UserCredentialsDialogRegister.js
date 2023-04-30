@@ -70,7 +70,7 @@ export default function UserCredentialsDialogRegister({
         <Button
           color="primary"
           variant="contained"
-          onClick={() => onSubmit(username, password, role, usdBalance, lbpBalance)}
+          onClick={() => onSubmit(username, password, role, lbpBalance, usdBalance)}
         >
           {submitText}
         </Button>
