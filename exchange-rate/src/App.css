@@ -63,6 +63,31 @@ body {
   display: block;
 }
 
+.wrapper-div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* optional, to vertically center the text */
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  background-color: #fff;
+  border-radius: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1.75rem;
+}
+.wrapper-div h2 {
+  margin: 0;
+}
+
+.wrapper-div h3 {
+  margin: 0;
+  padding: 0 10px;
+}
+.wrapper-div span{
+  margin-left: 1.5rem;
+}
+
+
 
 .nav {
   display: flex;
@@ -70,9 +95,6 @@ body {
   justify-content: space-between;
   }
 
-#add-button{
-  margin-top: 0.8rem;
-}
 
 .button-bar {
   display: flex;
@@ -99,6 +121,8 @@ body {
   margin-right: 0;
 }
 
+
+
 @media only screen and (min-width: 1400px) {
   .wrapper {
   width: 50%;
@@ -106,12 +130,70 @@ body {
   .wrapper input {
   width: 40rem;
   }
+  .wrapper-div{
+    width: 35%;
+  }
 }
 @media only screen and (max-width: 1399px) and (min-width: 750px) {
   .wrapper {
   width: 75%;
   }
+  .wrapper-div{
+    width: 60%;
+  }
   .wrapper input {
   width: 30rem;
   }
+
+}
+
+.nav-link {
+  color: #fff;
+  text-decoration: none;
+  font-size: 30px;
+}
+
+.nav-link-profile {
+  color: #fff;
+  text-decoration: none;
+  
+}
+@media screen and (max-width: 768px) {
+
+  .nav-link {
+    height: auto;
+    display: flex;
+    margin-left: 0.2rem;
+    font-size: 20px;
+  }
+
+  .nav-link a {
+    margin: 0 1rem;
+    padding: 0.5rem 0;
+  }
+}
+.wrapper button{
+  background-color: var(--primary-color);
+  color: #fff;
+  margin-top: 0.8rem;
+  margin-right: 0.5rem;
+}
+.wrapper button:hover{
+  background-color: var(--secondary-color);
+  color: black;
+  margin-top: 0.8rem;
+}
+
+.wrapper .custom-button-buy{
+  background-color: green;
+}
+.wrapper .custom-button-buy:hover{
+  background-color: rgba(0, 128, 0, 0.342);
+}
+
+.wrapper .custom-button-sell{
+  background-color: red;
+}
+.wrapper .custom-button-sell:hover{
+  background-color: rgba(255, 0, 0, 0.207);
 }
