@@ -164,6 +164,58 @@ const HomeScreen = () => {
       console.log("fill values!");
     }
   }
+  function buy(userId, usdInput){
+    const data = {
+      id: parseInt(id + 1),
+      usd_amount: parseInt(usdInput),
+      lbp_amount: parseInt(buyUsdRate)*parseInt(usdInput),
+      usd_to_lbp: 0,
+      to_user_id: parseInt(userId),
+    };
+    fetch(`${SERVER_URL}/transaction`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Success buy:", data);
+        fetchRates();
+      })
+
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
+  function sell(userId, usdInput){
+    const data = {
+      id: parseInt(id + 1),
+      usd_amount: parseInt(usdInput),
+      lbp_amount: parseInt(sellUsdRate)*parseInt(usdInput),
+      usd_to_lbp: 1,
+      to_user_id: parseInt(userId),
+    };
+    fetch(`${SERVER_URL}/transaction`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Success sell:", data);
+        fetchRates();
+      })
+
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
   function logout() {
     setUserToken(null);
     setUserRole(null);
@@ -237,17 +289,19 @@ const HomeScreen = () => {
       <BuyDialog
         open={authState === States.BUY}
         onClose={() => setAuthState(States.PENDING)}
-        onSubmit={login}
+        onSubmit={buy}
         submitText="BUY"
         title="Buy USD"
+        idText="From: User ID"
       />
 
       <BuyDialog
         open={authState === States.SELL}
         onClose={() => setAuthState(States.PENDING)}
-        onSubmit={login}
+        onSubmit={sell}
         submitText="SELL"
         title="SELL USD"
+        idText="To: User Id"
       />
 
       <Snackbar
@@ -259,6 +313,7 @@ const HomeScreen = () => {
       >
         <Alert severity="success">Success</Alert>
       </Snackbar>
+
       {changeBuyUsdRate > 0 && changeSellUsdRate === 0 && (
         <div className="wrapper">
           <h2>Today's Exchange Rate</h2>
@@ -466,6 +521,39 @@ const HomeScreen = () => {
           </Button>
         </div>
       )}
+      {changeBuyUsdRate < 0 && changeSellUsdRate > 0 && (
+        <div className="wrapper">
+          <h2>Today's Exchange Rate</h2>
+          <p>LBP to USD Exchange Rate</p>
+          <Tooltip title="To Buy 1$ in L.L">
+          <h3>
+            Buy USD: <span id="buy-usd-rate-down">{buyUsdRate}</span>
+          </h3>
+          </Tooltip>
+          <Tooltip title="To Sell 1$ in L.L">
+          <h3>
+            Sell USD: <span id="sell-usd-rate-up">{sellUsdRate}</span>
+          </h3>
+          </Tooltip>
+          
+          <hr />
+          {/* Here goes the calculator UI */}
+          <Button
+            className="btn"
+            color="inherit"
+            onClick={() => setViewCalculator(!viewCalculator)}
+          >
+            Calculator
+          </Button>
+          <Button
+            className="btn"
+            color="inherit"
+            onClick={() => setViewInsights(!viewInsights)}
+          >
+            Insights
+          </Button>
+        </div>
+      )}
 
       {viewCalculator === true && (
         <Tooltip title="Calculate realtime currency exchanges">
@@ -606,7 +694,8 @@ const HomeScreen = () => {
               30 Minutes
             </Button>
           </div>
-          <div className="button-bar">
+          {userToken &&(
+            <div className="button-bar">
             <Tooltip title="buy instantaneosly in the market">
             <Button
               onClick={() => setAuthState(States.BUY)}
@@ -625,6 +714,8 @@ const HomeScreen = () => {
           </Tooltip>
             
           </div>
+            )}
+          
         </div>
       )}
       {userToken !== null && (

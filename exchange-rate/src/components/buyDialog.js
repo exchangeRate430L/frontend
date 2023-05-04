@@ -11,6 +11,7 @@ export default function BuyDialog({
   onClose,
   title,
   submitText,
+  idText
 }) {
   let [usdInput, setUsdInput] = useState("");
   let [userId, setUserId] = useState("");
@@ -23,7 +24,7 @@ export default function BuyDialog({
         <div className="form-item">
           <TextField
             fullWidth
-            label="To: User Id"
+            label={idText}
             type="number"
             value={userId}
             onChange={({ target: { value } }) => setUserId(value)}

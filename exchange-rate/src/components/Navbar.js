@@ -32,13 +32,17 @@ const Navbar = ({ logout, States, setAuthState, userToken }) => {
                     <FaHome />
                   </Button>
                   </Tooltip>
-                  
+                  <Tooltip title="Go to profile">
                   <Button color="inherit" component={Link} to="/profile">
                     <FaEdit />
                   </Button>
+                  </Tooltip>
+                  <Tooltip title="Logout">
                   <Button color="inherit" onClick={logout}>
                     <FaSignOutAlt />
                   </Button>
+                  </Tooltip>
+                  
                 </div>
               ) : (
                 <div>
@@ -69,18 +73,23 @@ const Navbar = ({ logout, States, setAuthState, userToken }) => {
             </div>
           ) : (
             <div>
+              <Tooltip title="Create a new account">
               <Button
                 color="inherit"
                 onClick={() => setAuthState(States.USER_CREATION)}
               >
                 Register
               </Button>
+              </Tooltip>
+              <Tooltip title="Login if you have an account">
               <Button
                 color="inherit"
                 onClick={() => setAuthState(States.USER_LOG_IN)}
               >
                 Login
               </Button>
+              </Tooltip>
+              
             </div>
           )}
         </Toolbar>
