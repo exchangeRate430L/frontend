@@ -32,3 +32,4 @@ const ChartDay = ({ data }) => {
 };
 
 export default ChartDay;
+

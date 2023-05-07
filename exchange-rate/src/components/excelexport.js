@@ -31,3 +31,6 @@ const ExportExcel =({excelData, fileName}) => {
 }
 
 export default ExportExcel;
+
+// Used medium resource to work with excel export
+// https://medium.com/@aalam-info-solutions-llp/how-to-excel-export-in-react-js-481b15b961e3
