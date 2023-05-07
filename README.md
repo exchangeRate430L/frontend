@@ -34,3 +34,5 @@ the user token (logged in or guest) and on the personal infprmation token (displ
 - const getBalance: uses callBack when a user logs in to fetch the user's USD and LBP balance and displays them appropriately.  Uses the "/balance" route.
 
 - const fetchUserTransactions: uses callBack when a user logs in to fetch the user's individually done transactions on the website and displays them in a table appropriately.  Uses the "/transaction" GET route.
+
+## For more info on the setup go to exchange-rate/README.md
