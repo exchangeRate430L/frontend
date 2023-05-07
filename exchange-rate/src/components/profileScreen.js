@@ -45,43 +45,6 @@ const ProfileScreen = () => {
   let [userTransactions, setUserTransactions] = useState([]);
   let [userId, setUserId] = useState("");
 
-  function login(username, password) {
-    return fetch(`${SERVER_URL}/authentication`, {
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_name: username,
-        password: password,
-      }),
-    })
-      .then((response) => response.json())
-      .then((body) => {
-        setAuthState(States.USER_AUTHENTICATED);
-        setUserToken(body.token);
-        setUserRole(body.role);
-        saveUserToken(body.token);
-        saveUserRole(body.role);
-      });
-  }
-  function createUser(username, password, role, lbpBalance, usdBalance) {
-    return fetch(`${SERVER_URL}/user`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_name: username,
-        password: password,
-        role: role,
-        usd_balance: usdBalance,
-        lbp_balance: lbpBalance,
-      }),
-    }).then((response) => login(username, password));
-  }
-
   function logout() {
     setUserToken(null);
     clearUserToken();
@@ -139,31 +102,7 @@ const ProfileScreen = () => {
         setAuthState={() => {}}
         userToken={userToken}
       />
-      <UserCredentialsDialogRegister
-        open={authState === States.USER_CREATION}
-        onClose={() => setAuthState(States.PENDING)}
-        onSubmit={createUser}
-        submitText="Sign-Up"
-        title="Register"
-      />
 
-      <UserCredentialsDialog
-        open={authState === States.USER_LOG_IN}
-        onClose={() => setAuthState(States.PENDING)}
-        onSubmit={login}
-        submitText="Log in"
-        title="Welcome!"
-      />
-
-      <Snackbar
-        elevation={6}
-        variant="filled"
-        open={authState === States.USER_AUTHENTICATED}
-        autoHideDuration={2000}
-        onClose={() => setAuthState(States.PENDING)}
-      >
-        <Alert severity="success">Success</Alert>
-      </Snackbar>
       {userToken !== null && (
         <div className="wrapper-div">
           <h2>{userName} </h2>

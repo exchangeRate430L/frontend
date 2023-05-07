@@ -1,3 +1,11 @@
+# Setup
+- First, clone the github repository on your framework.
+- Install Node and npm. Installing Node will automatically install npm.
+- Run the backend, and make sure it's working.
+- Go to the directory: "..\frontend\exchange-rate>"
+- Run npm start.
+- You're good to go.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
