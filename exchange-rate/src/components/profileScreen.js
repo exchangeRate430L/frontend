@@ -1,6 +1,7 @@
 import React from "react";
 import Navbar from "./Navbar";
 import { useState } from "react";
+import Button from "@mui/material/Button";
 import {
   getUserToken,
   clearUserToken,
@@ -45,6 +46,23 @@ const ProfileScreen = () => {
     setUserName(null);
     clearUserLbpBalance();
     clearUserUsdBalance();
+  }
+
+  function getAlerts(){
+    fetch(`${SERVER_URL}/editAlert`, {
+      headers:{
+        Authorization: `bearer ${userToken}`
+      },
+    }).then((response)=> response.json())
+    .then((response)=>console.log(response));
+  }
+  function stopAlerts(){
+    fetch(`${SERVER_URL}/stopAlert`, {
+      headers:{
+        Authorization: `bearer ${userToken}`
+      },
+    }).then((response)=> response.json())
+    .then((response)=>console.log(response));
   }
 
   const getBalance = useCallback(() => {
@@ -100,6 +118,7 @@ const ProfileScreen = () => {
             <span>USD: ${usdBalance}</span>
             <span>LBP: {lbpBalance}L.L</span>
           </h3>
+          
         </div>
       )}
       {userToken && (
@@ -108,6 +127,12 @@ const ProfileScreen = () => {
           <p>User ID: {userId}</p>
           <p>User Name: {userName}</p>
           <p>Role: {userRole}</p>
+          <Button className="btn" color="inherit" onClick={()=>{
+            getAlerts();
+          }}>Get Alerts</Button>
+          <Button className="btn" color="inherit" onClick={()=>{
+            stopAlerts();
+          }}>Stop Alerts</Button>
         </div>
       )}
       {userToken && (
