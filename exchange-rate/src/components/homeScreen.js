@@ -9,6 +9,7 @@ import Button from "@mui/material/Button";
 import UserCredentialsDialog from "../UserCredentialsDialog/UserCredentialsDialog";
 import UserCredentialsDialogRegister from "../UserCredentialsDialog/UserCredentialsDialogRegister";
 import { Snackbar, TextField, Tooltip } from "@mui/material";
+import { useCallback } from "react";
 import Alert from "@mui/material/Alert";
 import {
   getUserToken,
@@ -25,6 +26,7 @@ import ChartDay from "./chartDayPage";
 import ChartMin from "./chartMinPage";
 import "../App.css";
 import BuyDialog from "./buyDialog";
+import emailjs from "emailjs-com";
 
 var SERVER_URL = "http://127.0.0.1:5000";
 var id = 0;
@@ -62,11 +64,50 @@ const HomeScreen = () => {
   let [viewDay, setViewDay] = useState(true);
   let [viewHour, setViewHour] = useState(false);
   let [viewMin, setViewMin] = useState(false);
-  // eslint-disable-next-line
   let [userName, setUserName] = useState("");
   let [userTransaction, setUserTransaction] = useState("");
   let [viewNumOfTrans, setViewNumOfTrans] = useState(false);
   let [viewChange, setViewChange] = useState(false);
+  let [userEmail, setUserEmail] = useState("");
+  let [alertView, setAlertView] = useState(false);
+
+  const getBalance = useCallback(() => {
+    fetch(`${SERVER_URL}/balance`, {
+      headers: {
+        Authorization: `bearer ${userToken}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((balance) => {
+        setUserEmail(balance.user_email);
+      });
+  }, [userToken]);
+  useEffect(() => {
+    if (userToken) {
+      getBalance();
+    }
+  }, [getBalance, userToken]);
+
+  function sendEmail(to_email, message) {
+    const templateParams = {
+      to_email,
+      message,
+    };
+
+    emailjs
+      .send(
+        "service_w12t0fb",
+        "template_0jlr076",
+        templateParams,
+        "ej7YxNe85ZhDS9bax"
+      )
+      .then((response) => {
+        console.log("Email sent!", response.status, response.text);
+      })
+      .catch((err) => {
+        console.error("Failed to send email", err);
+      });
+  }
 
   function handleClick(button) {
     if (button === "day") {
@@ -102,6 +143,26 @@ const HomeScreen = () => {
       });
   }
   useEffect(fetchRates, []);
+
+  function alert() {
+    fetch(`${SERVER_URL}/exchangeRate`)
+      .then((response) => response.json())
+      .then((data) => {
+        setChangeBuyUsdRate(data.change_lbp_usd);
+        setChangeSellUsdRate(data.change_usd_lbp);
+
+        if (data.change_lbp_usd > 1000) {
+          sendEmail(userEmail, "Increase in LBP to USD!");
+        } else if (data.change_lbp_usd < -1000) {
+          sendEmail(userEmail, "Decrease in LBP to USD!");
+        }
+        if (data.change_usd_lbp > 1000) {
+          sendEmail(userEmail, "Increase in USD to LBP!");
+        } else if (data.change_usd_lbp < -1000) {
+          sendEmail(userEmail, "Decrease in USD to LBP!");
+        }
+      });
+  }
 
   function addItem() {
     if (lbpInput !== 0 && usdInput !== 0) {
@@ -164,11 +225,11 @@ const HomeScreen = () => {
       console.log("fill values!");
     }
   }
-  function buy(userId, usdInput){
+  function buy(userId, usdInput) {
     const data = {
       id: parseInt(id + 1),
       usd_amount: parseInt(usdInput),
-      lbp_amount: parseInt(buyUsdRate)*parseInt(usdInput),
+      lbp_amount: parseInt(buyUsdRate) * parseInt(usdInput),
       usd_to_lbp: 0,
       to_user_id: parseInt(userId),
     };
@@ -190,11 +251,11 @@ const HomeScreen = () => {
         console.error("Error:", error);
       });
   }
-  function sell(userId, usdInput){
+  function sell(userId, usdInput) {
     const data = {
       id: parseInt(id + 1),
       usd_amount: parseInt(usdInput),
-      lbp_amount: parseInt(sellUsdRate)*parseInt(usdInput),
+      lbp_amount: parseInt(sellUsdRate) * parseInt(usdInput),
       usd_to_lbp: 1,
       to_user_id: parseInt(userId),
     };
@@ -224,7 +285,9 @@ const HomeScreen = () => {
     setUserName(null);
     clearUserLbpBalance();
     clearUserUsdBalance();
+    setUserEmail(null);
   }
+
   function login(username, password) {
     return fetch(`${SERVER_URL}/authentication`, {
       method: "POST",
@@ -246,7 +309,7 @@ const HomeScreen = () => {
         saveUserRole(body.role);
       });
   }
-  function createUser(username, password, role, lbpBalance, usdBalance) {
+  function createUser(username, email, password, role, lbpBalance, usdBalance) {
     return fetch(`${SERVER_URL}/user`, {
       method: "POST",
       headers: {
@@ -258,8 +321,13 @@ const HomeScreen = () => {
         role: role,
         usd_balance: usdBalance,
         lbp_balance: lbpBalance,
+        email: email,
       }),
-    }).then((response) => login(username, password));
+    }).then((response) => {
+      login(username, password);
+      sendEmail(email, "Thanks for signing up!");
+      console.log(response.json());
+    });
   }
 
   return (
@@ -319,11 +387,11 @@ const HomeScreen = () => {
           <h2>Today's Exchange Rate</h2>
           <p>LBP to USD Exchange Rate</p>
           <Tooltip title="The Price of 1$ in L.L">
-          <h3>
-            Buy USD: <span id="buy-usd-rate-up">{buyUsdRate}</span>
-          </h3>
+            <h3>
+              Buy USD: <span id="buy-usd-rate-up">{buyUsdRate}</span>
+            </h3>
           </Tooltip>
-          
+
           <h3>
             Sell USD: <span id="sell-usd-rate">{sellUsdRate}</span>
           </h3>
@@ -478,7 +546,7 @@ const HomeScreen = () => {
           >
             Calculator
           </Button>
-          
+
           <Button
             className="btn"
             color="inherit"
@@ -493,16 +561,16 @@ const HomeScreen = () => {
           <h2>Today's Exchange Rate</h2>
           <p>LBP to USD Exchange Rate</p>
           <Tooltip title="To Buy 1$ in L.L">
-          <h3>
-            Buy USD: <span id="buy-usd-rate-up">{buyUsdRate}</span>
-          </h3>
+            <h3>
+              Buy USD: <span id="buy-usd-rate-up">{buyUsdRate}</span>
+            </h3>
           </Tooltip>
           <Tooltip title="To Sell 1$ in L.L">
-          <h3>
-            Sell USD: <span id="sell-usd-rate-up">{sellUsdRate}</span>
-          </h3>
+            <h3>
+              Sell USD: <span id="sell-usd-rate-up">{sellUsdRate}</span>
+            </h3>
           </Tooltip>
-          
+
           <hr />
           {/* Here goes the calculator UI */}
           <Button
@@ -526,16 +594,16 @@ const HomeScreen = () => {
           <h2>Today's Exchange Rate</h2>
           <p>LBP to USD Exchange Rate</p>
           <Tooltip title="To Buy 1$ in L.L">
-          <h3>
-            Buy USD: <span id="buy-usd-rate-down">{buyUsdRate}</span>
-          </h3>
+            <h3>
+              Buy USD: <span id="buy-usd-rate-down">{buyUsdRate}</span>
+            </h3>
           </Tooltip>
           <Tooltip title="To Sell 1$ in L.L">
-          <h3>
-            Sell USD: <span id="sell-usd-rate-up">{sellUsdRate}</span>
-          </h3>
+            <h3>
+              Sell USD: <span id="sell-usd-rate-up">{sellUsdRate}</span>
+            </h3>
           </Tooltip>
-          
+
           <hr />
           {/* Here goes the calculator UI */}
           <Button
@@ -557,69 +625,69 @@ const HomeScreen = () => {
 
       {viewCalculator === true && (
         <Tooltip title="Calculate realtime currency exchanges">
-            <div className="wrapper">
-          <h2>Transaction Claculator:</h2>
-          <h3>
-            LBP to USD amount ={" "}
-            <span id="from-lbp-to-usd">{lbpAmount / buyUsdRate}</span>
-          </h3>
-          <form name="calculator-entry">
-            <div className="amount-input">
-              <label htmlFor="lbp-amount">LBP Amount</label>
-              <TextField
-                id="lbp-amount"
-                type="number"
-                value={lbpAmount}
-                onChange={(e) => {
-                  if (e.target.value > 0) {
-                    setLbpAmount(e.target.value);
-                  } else {
-                    setLbpAmount("");
-                  }
-                }}
-              />
-            </div>
-          </form>
-          <hr />
-          <h3>
-            USD to LBP amount ={" "}
-            <span id="from-usd-to-lbp">{usdAmount * sellUsdRate}</span>
-          </h3>
-          <form name="calculator-entry">
-            <div className="amount-input">
-              <label htmlFor="usd-amount">USD amount</label>
-              <TextField
-                id="usd-amount"
-                type="number"
-                value={usdAmount}
-                onChange={(e) => {
-                  if (e.target.value > 0) {
-                    setUsdAmount(e.target.value);
-                  } else {
-                    setUsdAmount("");
-                  }
-                }}
-              />
-            </div>
-          </form>
-        </div>
+          <div className="wrapper">
+            <h2>Transaction Claculator:</h2>
+            <h3>
+              LBP to USD amount ={" "}
+              <span id="from-lbp-to-usd">{lbpAmount / buyUsdRate}</span>
+            </h3>
+            <form name="calculator-entry">
+              <div className="amount-input">
+                <label htmlFor="lbp-amount">LBP Amount</label>
+                <TextField
+                  id="lbp-amount"
+                  type="number"
+                  value={lbpAmount}
+                  onChange={(e) => {
+                    if (e.target.value > 0) {
+                      setLbpAmount(e.target.value);
+                    } else {
+                      setLbpAmount("");
+                    }
+                  }}
+                />
+              </div>
+            </form>
+            <hr />
+            <h3>
+              USD to LBP amount ={" "}
+              <span id="from-usd-to-lbp">{usdAmount * sellUsdRate}</span>
+            </h3>
+            <form name="calculator-entry">
+              <div className="amount-input">
+                <label htmlFor="usd-amount">USD amount</label>
+                <TextField
+                  id="usd-amount"
+                  type="number"
+                  value={usdAmount}
+                  onChange={(e) => {
+                    if (e.target.value > 0) {
+                      setUsdAmount(e.target.value);
+                    } else {
+                      setUsdAmount("");
+                    }
+                  }}
+                />
+              </div>
+            </form>
+          </div>
         </Tooltip>
       )}
       {viewInsights === true && (
         <div className="wrapper">
-            <Tooltip title="Latest stats about prices and transactions">
+          <Tooltip title="Latest stats about prices and transactions">
             <h2>Statistics about Rates</h2>
-            </Tooltip>
-          <Tooltip title="Click to chech number of transactions Today">
-          <Button
-            className="btn"
-            color="inherit"
-            onClick={() => setViewNumOfTrans(!viewNumOfTrans)}
-          >
-            Number of Transactions
-          </Button>
           </Tooltip>
-          
+          <Tooltip title="Click to chech number of transactions Today">
+            <Button
+              className="btn"
+              color="inherit"
+              onClick={() => setViewNumOfTrans(!viewNumOfTrans)}
+            >
+              Number of Transactions
+            </Button>
+          </Tooltip>
+
           {viewNumOfTrans === true && (
             <div>
               <h3>
@@ -634,15 +702,15 @@ const HomeScreen = () => {
           )}
           <hr />
           <Tooltip title="click to chech live price changes">
-          <Button
-            className="btn"
-            color="inherit"
-            onClick={() => setViewChange(!viewChange)}
-          >
-            Changes in Prices
-          </Button>
+            <Button
+              className="btn"
+              color="inherit"
+              onClick={() => setViewChange(!viewChange)}
+            >
+              Changes in Prices
+            </Button>
           </Tooltip>
-          
+
           {viewChange === true && (
             <div>
               <h3>
@@ -653,6 +721,15 @@ const HomeScreen = () => {
                 sell USD price change:{" "}
                 <span id="num-sell-usd">{changeSellUsdRate}</span>
               </h3>
+              {userToken!==null && (
+                 <div>
+                 <Tooltip title="set alert for price changes">
+                   <Button onClick={() => alert()} className="custom-button">
+                     Alert
+                   </Button>
+                 </Tooltip>
+               </div>
+              )}
             </div>
           )}
           <hr />
@@ -694,28 +771,31 @@ const HomeScreen = () => {
               30 Minutes
             </Button>
           </div>
-          {userToken &&(
+          {userToken && (
             <div className="button-bar">
-            <Tooltip title="buy instantaneosly in the market">
-            <Button
-              onClick={() => setAuthState(States.BUY)}
-              className="custom-button-buy"
-            >
-              Buy
-            </Button>
-            </Tooltip>
-          <Tooltip title="sell instantaneously in the market">
-          <Button
-              onClick={() => setAuthState(States.SELL)}
-              className="custom-button-sell"
-            >
-              Sell
-            </Button>
-          </Tooltip>
-            
-          </div>
-            )}
-          
+              <Tooltip title="buy instantaneosly in the market">
+                <Button
+                  onClick={() => setAuthState(States.BUY)}
+                  className="custom-button-buy"
+                >
+                  Buy
+                </Button>
+              </Tooltip>
+              <Tooltip title="sell instantaneously in the market">
+                <Button
+                  onClick={() => setAuthState(States.SELL)}
+                  className="custom-button-sell"
+                >
+                  Sell
+                </Button>
+              </Tooltip>
+              <Tooltip title="alert when price reaches ...">
+                <Button onClick={() => alert()} className="custom-button">
+                  Alert
+                </Button>
+              </Tooltip>
+            </div>
+          )}
         </div>
       )}
       {userToken !== null && (
@@ -770,10 +850,12 @@ const HomeScreen = () => {
           </Button>
         </div>
       )}
-
       <script src="script.js"></script>
     </div>
   );
 };
 
 export default HomeScreen;
+
+//used emailjs documentation to send emails
+//https://www.emailjs.com/docs/examples/reactjs/

@@ -17,6 +17,7 @@ export default function UserCredentialsDialogRegister({
   let [role, setRole] = useState("");
   let [usdBalance, setUsdBalance] = useState(0);
   let [lbpBalance, setLbpBalance] = useState(0);
+  let [email, setEmail] = useState("");
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
@@ -29,6 +30,15 @@ export default function UserCredentialsDialogRegister({
             type="text"
             value={username}
             onChange={({ target: { value } }) => setUsername(value)}
+          />
+        </div>
+        <div className="form-item">
+          <TextField
+            fullWidth
+            label="Email"
+            type="text"
+            value={email}
+            onChange={({ target: { value } }) => setEmail(value)}
           />
         </div>
         <div className="form-item">
@@ -70,7 +80,7 @@ export default function UserCredentialsDialogRegister({
         <Button
           color="primary"
           variant="contained"
-          onClick={() => onSubmit(username, password, role, lbpBalance, usdBalance)}
+          onClick={() => onSubmit(username, email, password, role, lbpBalance, usdBalance)}
         >
           {submitText}
         </Button>

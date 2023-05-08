@@ -11,16 +11,10 @@ import {
   saveUserUsdBalance,
   getUserLbpBalance,
   getUserUsdBalance,
-  saveUserToken,
-  saveUserRole,
   getUserRole,
 } from "../localStorage";
 import { useCallback } from "react";
 import { useEffect } from "react";
-import UserCredentialsDialog from "../UserCredentialsDialog/UserCredentialsDialog";
-import UserCredentialsDialogRegister from "../UserCredentialsDialog/UserCredentialsDialogRegister";
-import { Alert } from "@mui/material";
-import { Snackbar } from "@mui/material";
 import { Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import ExportExcel from "./excelexport";
@@ -40,8 +34,7 @@ const ProfileScreen = () => {
   let [userName, setUserName] = useState("");
   let [usdBalance, setUsdBalance] = useState(getUserUsdBalance());
   let [lbpBalance, setLbpBalance] = useState(getUserLbpBalance());
-  let [authState, setAuthState] = useState(States.PENDING);
-  let [userRole, setUserRole] = useState(getUserRole());
+  let userRole = useState(getUserRole());
   let [userTransactions, setUserTransactions] = useState([]);
   let [userId, setUserId] = useState("");
 
@@ -81,11 +74,7 @@ const ProfileScreen = () => {
       .then((transactions) => setUserTransactions(transactions));
   }, [userToken]);
 
-  useEffect(() => {
-    if (userToken) {
-      fetchUserTransactions();
-    }
-  }, [fetchUserTransactions, userToken]);
+  
 
   useEffect(() => {
     if (userToken) {
