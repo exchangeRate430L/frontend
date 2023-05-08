@@ -35,7 +35,7 @@ const ProfileScreen = () => {
   let [userName, setUserName] = useState("");
   let [usdBalance, setUsdBalance] = useState(getUserUsdBalance());
   let [lbpBalance, setLbpBalance] = useState(getUserLbpBalance());
-  let userRole = useState(getUserRole());
+  let [userRole, setUserRole] = useState(getUserRole());
   let [userTransactions, setUserTransactions] = useState([]);
   let [userId, setUserId] = useState("");
 
