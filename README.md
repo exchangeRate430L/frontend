@@ -14,11 +14,15 @@ the user token (logged in or guest) and on the personal information token (displ
 - No profile page, and no transactions can be done if the user is not logged in
 - Once the user is logged in, profile button will appear in the nav bar which leads him to his profile screen
 - Once the user is logged in, he would be available to perform transactions, as well as instanteneous transcations from below the chart of price flucuation.
+- Once the user is logged in he can turn the alert on to receive emails one the prices go down, or up fast. He can also set an alert at a specific price for a specific currency.
 
 ## Profile Page
 - Only available for logged in users
 - Contains user's personal information (id, balance, user name...)
 - Contains user's transactions history and user can download an excel sheet with his transactions
+
+## News Page
+- All users can check news related to currencies. (Wall Street Journal & Business insights in US).
 
 # The Home Screen functions:
 
@@ -34,7 +38,13 @@ the user token (logged in or guest) and on the personal information token (displ
 
 - functions login(), logout(), and createUser(): handles the login, logout, and register functionalities via unique user tokens.  Use the "/authentication" and "/user"  routes to log in and register respectively. 
 
-- function handlClick(): handles the transition between day, hour, or minutes charts.
+- function handlClick(): handles the transition between day, hour, or minutes charts.\
+
+- function alert(): alerts the users by email about price changes and specific price reached set by the user.
+
+- function sendEmail(): is used to send emails to users.
+
+- const getBalance(): is used in homepage to get the email of the user logged in, as it is one of the arguments returned by this endpoint ("/balance").
 
 - var States: is a map of states of this page.
 
