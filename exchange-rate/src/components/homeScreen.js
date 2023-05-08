@@ -8,6 +8,7 @@ import Button from "@mui/material/Button";
 // import {Link} from "react-router-dom";
 import UserCredentialsDialog from "../UserCredentialsDialog/UserCredentialsDialog";
 import UserCredentialsDialogRegister from "../UserCredentialsDialog/UserCredentialsDialogRegister";
+import PriceAlertDialog from "./priceAlertDialog";
 import { Snackbar, TextField, Tooltip } from "@mui/material";
 import { useCallback } from "react";
 import Alert from "@mui/material/Alert";
@@ -31,6 +32,7 @@ import emailjs from "emailjs-com";
 var SERVER_URL = "http://127.0.0.1:5000";
 var id = 0;
 var booleanTrans = 0;
+var boolAlert = 0;
 
 const States = {
   PENDING: "PENDING",
@@ -39,6 +41,8 @@ const States = {
   USER_AUTHENTICATED: "USER_AUTHENTICATED",
   BUY: "BUY",
   SELL: "SELL",
+  ALERTUSD: "ALERTUSD",
+  ALERTLBP: "ALERTLBP"
 };
 
 const HomeScreen = () => {
@@ -64,11 +68,13 @@ const HomeScreen = () => {
   let [viewDay, setViewDay] = useState(true);
   let [viewHour, setViewHour] = useState(false);
   let [viewMin, setViewMin] = useState(false);
+  // eslint-disable-next-line
   let [userName, setUserName] = useState("");
   let [userTransaction, setUserTransaction] = useState("");
   let [viewNumOfTrans, setViewNumOfTrans] = useState(false);
   let [viewChange, setViewChange] = useState(false);
-  let [userEmail, setUserEmail] = useState("");
+  let [userEmail, setUserEmail] = useState(null);
+  // eslint-disable-next-line
   let [alertView, setAlertView] = useState(false);
 
   const getBalance = useCallback(() => {
@@ -82,11 +88,39 @@ const HomeScreen = () => {
         setUserEmail(balance.user_email);
       });
   }, [userToken]);
+
+  const alert = useCallback(()=>{
+    fetch(`${SERVER_URL}/alert`,{
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        setAlertView(data.user_alert);
+        if(data.user_alert===true){
+          if (changeBuyUsdRate > 150000 && userEmail!==null) {
+            sendEmail(userEmail, "Increase in LBP to USD!");
+          } else if (changeBuyUsdRate < -150000 && userEmail!==null) {
+            sendEmail(userEmail, "Decrease in LBP to USD!");
+          }
+          if (changeSellUsdRate > 150000 && userEmail!==null) {
+            sendEmail(userEmail, "Increase in USD to LBP!");
+          } else if (changeSellUsdRate < -150000 && userEmail!==null) {
+            sendEmail(userEmail, "Decrease in USD to LBP!");
+          }
+        }
+      });
+  },[userToken, userEmail, changeBuyUsdRate, changeSellUsdRate]);
+
   useEffect(() => {
     if (userToken) {
       getBalance();
+      alert();
     }
-  }, [getBalance, userToken]);
+  }, [getBalance, alert, userToken]);
 
   function sendEmail(to_email, message) {
     const templateParams = {
@@ -108,6 +142,7 @@ const HomeScreen = () => {
         console.error("Failed to send email", err);
       });
   }
+  
 
   function handleClick(button) {
     if (button === "day") {
@@ -127,7 +162,7 @@ const HomeScreen = () => {
     }
   }
   function fetchRates() {
-    fetch(`${SERVER_URL}/exchangeRate`)
+      fetch(`${SERVER_URL}/exchangeRate`)
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
@@ -139,30 +174,9 @@ const HomeScreen = () => {
         setChangeSellUsdRate(data.change_usd_lbp);
         setDataChartHour(data.combined_data_hour);
         setDataChartDay(data.combined_data_day);
-        id = data.id;
       });
   }
   useEffect(fetchRates, []);
-
-  function alert() {
-    fetch(`${SERVER_URL}/exchangeRate`)
-      .then((response) => response.json())
-      .then((data) => {
-        setChangeBuyUsdRate(data.change_lbp_usd);
-        setChangeSellUsdRate(data.change_usd_lbp);
-
-        if (data.change_lbp_usd > 1000) {
-          sendEmail(userEmail, "Increase in LBP to USD!");
-        } else if (data.change_lbp_usd < -1000) {
-          sendEmail(userEmail, "Decrease in LBP to USD!");
-        }
-        if (data.change_usd_lbp > 1000) {
-          sendEmail(userEmail, "Increase in USD to LBP!");
-        } else if (data.change_usd_lbp < -1000) {
-          sendEmail(userEmail, "Decrease in USD to LBP!");
-        }
-      });
-  }
 
   function addItem() {
     if (lbpInput !== 0 && usdInput !== 0) {
@@ -309,7 +323,12 @@ const HomeScreen = () => {
         saveUserRole(body.role);
       });
   }
-  function createUser(username, email, password, role, lbpBalance, usdBalance) {
+  function createUser(username, email, password, role, lbpBalance, usdBalance, alert) {
+    if(alert==='alert'){
+      boolAlert = 1;
+    }else{
+      boolAlert = 0;
+    }
     return fetch(`${SERVER_URL}/user`, {
       method: "POST",
       headers: {
@@ -322,12 +341,42 @@ const HomeScreen = () => {
         usd_balance: usdBalance,
         lbp_balance: lbpBalance,
         email: email,
+        alert: boolAlert
       }),
     }).then((response) => {
       login(username, password);
       sendEmail(email, "Thanks for signing up!");
       console.log(response.json());
     });
+  }
+
+  function alertPriceUsd(ceiling, floor) {
+    fetch(`${SERVER_URL}/exchangeRate`)
+      .then((response) => response.json())
+      .then((data) => {
+
+        if (data.usd_to_lbp >= ceiling) {
+          sendEmail(userEmail, `USD price reached ${ceiling}!`);
+        } else if (data.usd_to_lbp <= floor) {
+          sendEmail(userEmail, `USD price reached ${floor}!`);
+        }
+        
+        setAuthState(States.PENDING);
+      });
+  }
+  function alertPriceLbp(ceiling, floor) {
+    fetch(`${SERVER_URL}/exchangeRate`)
+      .then((response) => response.json())
+      .then((data) => {
+
+        if (data.lbp_to_usd >= ceiling) {
+          sendEmail(userEmail, `USD price reached ${ceiling}!`);
+        } else if (data.lbp_to_usd <= floor) {
+          sendEmail(userEmail, `USD price reached ${floor}!`);
+        }
+        
+        setAuthState(States.PENDING);
+      });
   }
 
   return (
@@ -370,6 +419,20 @@ const HomeScreen = () => {
         submitText="SELL"
         title="SELL USD"
         idText="To: User Id"
+      />
+      <PriceAlertDialog
+      open={authState === States.ALERTUSD}
+      onClose={()=> setAuthState(States.PENDING)}
+      onSubmit={alertPriceUsd}
+      submitText="Alert"
+      title="Set Alert"
+      />
+      <PriceAlertDialog
+      open={authState === States.ALERTLBP}
+      onClose={()=> setAuthState(States.PENDING)}
+      onSubmit={alertPriceLbp}
+      submitText="Alert"
+      title="Set Alert"
       />
 
       <Snackbar
@@ -622,6 +685,39 @@ const HomeScreen = () => {
           </Button>
         </div>
       )}
+      {changeBuyUsdRate > 0 && changeSellUsdRate < 0 && (
+        <div className="wrapper">
+          <h2>Today's Exchange Rate</h2>
+          <p>LBP to USD Exchange Rate</p>
+          <Tooltip title="To Buy 1$ in L.L">
+            <h3>
+              Buy USD: <span id="buy-usd-rate-up">{buyUsdRate}</span>
+            </h3>
+          </Tooltip>
+          <Tooltip title="To Sell 1$ in L.L">
+            <h3>
+              Sell USD: <span id="sell-usd-rate-down">{sellUsdRate}</span>
+            </h3>
+          </Tooltip>
+
+          <hr />
+          {/* Here goes the calculator UI */}
+          <Button
+            className="btn"
+            color="inherit"
+            onClick={() => setViewCalculator(!viewCalculator)}
+          >
+            Calculator
+          </Button>
+          <Button
+            className="btn"
+            color="inherit"
+            onClick={() => setViewInsights(!viewInsights)}
+          >
+            Insights
+          </Button>
+        </div>
+      )}
 
       {viewCalculator === true && (
         <Tooltip title="Calculate realtime currency exchanges">
@@ -721,15 +817,6 @@ const HomeScreen = () => {
                 sell USD price change:{" "}
                 <span id="num-sell-usd">{changeSellUsdRate}</span>
               </h3>
-              {userToken!==null && (
-                 <div>
-                 <Tooltip title="set alert for price changes">
-                   <Button onClick={() => alert()} className="custom-button">
-                     Alert
-                   </Button>
-                 </Tooltip>
-               </div>
-              )}
             </div>
           )}
           <hr />
@@ -790,8 +877,13 @@ const HomeScreen = () => {
                 </Button>
               </Tooltip>
               <Tooltip title="alert when price reaches ...">
-                <Button onClick={() => alert()} className="custom-button">
-                  Alert
+                <Button onClick={() => setAuthState(States.ALERTUSD)} className="custom-button">
+                  Alert USD
+                </Button>
+              </Tooltip>
+              <Tooltip title="alert when price reaches ...">
+                <Button onClick={() => setAuthState(States.ALERTLBP)} className="custom-button">
+                  Alert LBP
                 </Button>
               </Tooltip>
             </div>

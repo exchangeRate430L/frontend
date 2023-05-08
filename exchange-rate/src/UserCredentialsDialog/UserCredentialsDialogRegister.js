@@ -18,6 +18,7 @@ export default function UserCredentialsDialogRegister({
   let [usdBalance, setUsdBalance] = useState(0);
   let [lbpBalance, setLbpBalance] = useState(0);
   let [email, setEmail] = useState("");
+  let [alert, setAlert] = useState("");
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
@@ -77,10 +78,20 @@ export default function UserCredentialsDialogRegister({
             onChange={({ target: { value } }) => setUsdBalance(value)}
           />
         </div>
+        <select
+          id="alert"
+          value={alert}
+          onChange={(e) => setAlert(e.target.value)}
+        >
+          <option value="alert">Get Alerts</option>
+          <option value="no-alert">Don't Get Alerts</option>
+        </select>
         <Button
           color="primary"
           variant="contained"
-          onClick={() => onSubmit(username, email, password, role, lbpBalance, usdBalance)}
+          onClick={() =>
+            onSubmit(username, email, password, role, lbpBalance, usdBalance, alert)
+          }
         >
           {submitText}
         </Button>
