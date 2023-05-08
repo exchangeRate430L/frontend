@@ -20,6 +20,7 @@ the user token (logged in or guest) and on the personal information token (displ
 - Only available for logged in users
 - Contains user's personal information (id, balance, user name...)
 - Contains user's transactions history and user can download an excel sheet with his transactions
+- User can set if he wants to receive alerts or not
 
 ## News Page
 - All users can check news related to currencies. (Wall Street Journal & Business insights in US).
@@ -59,6 +60,10 @@ the user token (logged in or guest) and on the personal information token (displ
 - const getBalance: uses callBack when a user logs in to fetch the user's USD and LBP balance and displays them appropriately.  Uses the "/balance" route.
 
 - const fetchUserTransactions: uses callBack when a user logs in to fetch the user's individually done transactions on the website and displays them in a table appropriately.  Uses the "/transaction" GET route.
+
+- getAlerts(): is a function that edits the alert parameter in the user database to receive alert of prices.
+
+- stopAlert(): is a function that edits the alert parameter in the user database to stop receiving alerts of prices.
 
 # Structure
 - components folder contains all components used in the homeScreen and the profileScreen which are also included there. The use of seperate components is the main thing in React which is not to rerender the whole website whenever a state of a child component is created.
