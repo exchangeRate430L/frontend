@@ -46,6 +46,8 @@ the user token (logged in or guest) and on the personal information token (displ
 
 - const getBalance(): is used in homepage to get the email of the user logged in, as it is one of the arguments returned by this endpoint ("/balance").
 
+- const alert(): is used in homepage to check if the user turned alerts on, so that high changes in price will be alerted to him by email. It the uses the route ("/alert") in the backend which return the users alert argument.
+
 - var States: is a map of states of this page.
 
 - var booleanTrans: is a variable that sets the usd-to-lbp option to true or false.
