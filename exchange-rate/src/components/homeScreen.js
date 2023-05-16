@@ -30,6 +30,7 @@ import BuyDialog from "./buyDialog";
 import emailjs from "emailjs-com";
 
 var SERVER_URL = "http://127.0.0.1:5000";
+
 var id = 0;
 var booleanTrans = 0;
 var boolAlert = 0;
