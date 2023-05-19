@@ -35,6 +35,7 @@ const ProfileScreen = () => {
   let [userName, setUserName] = useState("");
   let [usdBalance, setUsdBalance] = useState(getUserUsdBalance());
   let [lbpBalance, setLbpBalance] = useState(getUserLbpBalance());
+  // eslint-disable-next-line
   let [userRole, setUserRole] = useState(getUserRole());
   let [userTransactions, setUserTransactions] = useState([]);
   let [userId, setUserId] = useState("");

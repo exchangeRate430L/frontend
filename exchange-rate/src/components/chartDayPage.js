@@ -33,3 +33,5 @@ const ChartDay = ({ data }) => {
 
 export default ChartDay;
 
+// Tutorial points
+// https://www.tutorialspoint.com/how-to-create-an-area-chart-using-recharts-in-reactjs

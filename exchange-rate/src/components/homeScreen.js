@@ -43,7 +43,7 @@ const States = {
   BUY: "BUY",
   SELL: "SELL",
   ALERTUSD: "ALERTUSD",
-  ALERTLBP: "ALERTLBP"
+  ALERTLBP: "ALERTLBP",
 };
 
 const HomeScreen = () => {
@@ -90,8 +90,8 @@ const HomeScreen = () => {
       });
   }, [userToken]);
 
-  const alert = useCallback(()=>{
-    fetch(`${SERVER_URL}/alert`,{
+  const alert = useCallback(() => {
+    fetch(`${SERVER_URL}/alert`, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${userToken}`,
@@ -101,20 +101,20 @@ const HomeScreen = () => {
       .then((data) => {
         console.log(data);
         setAlertView(data.user_alert);
-        if(data.user_alert===true){
-          if (changeBuyUsdRate > 150000 && userEmail!==null) {
+        if (data.user_alert === true) {
+          if (changeBuyUsdRate > 150000 && userEmail !== null) {
             sendEmail(userEmail, "Increase in LBP to USD!");
-          } else if (changeBuyUsdRate < -150000 && userEmail!==null) {
+          } else if (changeBuyUsdRate < -150000 && userEmail !== null) {
             sendEmail(userEmail, "Decrease in LBP to USD!");
           }
-          if (changeSellUsdRate > 150000 && userEmail!==null) {
+          if (changeSellUsdRate > 150000 && userEmail !== null) {
             sendEmail(userEmail, "Increase in USD to LBP!");
-          } else if (changeSellUsdRate < -150000 && userEmail!==null) {
+          } else if (changeSellUsdRate < -150000 && userEmail !== null) {
             sendEmail(userEmail, "Decrease in USD to LBP!");
           }
         }
       });
-  },[userToken, userEmail, changeBuyUsdRate, changeSellUsdRate]);
+  }, [userToken, userEmail, changeBuyUsdRate, changeSellUsdRate]);
 
   useEffect(() => {
     if (userToken) {
@@ -143,7 +143,6 @@ const HomeScreen = () => {
         console.error("Failed to send email", err);
       });
   }
-  
 
   function handleClick(button) {
     if (button === "day") {
@@ -163,7 +162,7 @@ const HomeScreen = () => {
     }
   }
   function fetchRates() {
-      fetch(`${SERVER_URL}/exchangeRate`)
+    fetch(`${SERVER_URL}/exchangeRate`)
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
@@ -324,10 +323,18 @@ const HomeScreen = () => {
         saveUserRole(body.role);
       });
   }
-  function createUser(username, email, password, role, lbpBalance, usdBalance, alert) {
-    if(alert==='alert'){
+  function createUser(
+    username,
+    email,
+    password,
+    role,
+    lbpBalance,
+    usdBalance,
+    alert
+  ) {
+    if (alert === "alert") {
       boolAlert = 1;
-    }else{
+    } else {
       boolAlert = 0;
     }
     return fetch(`${SERVER_URL}/user`, {
@@ -342,7 +349,7 @@ const HomeScreen = () => {
         usd_balance: usdBalance,
         lbp_balance: lbpBalance,
         email: email,
-        alert: boolAlert
+        alert: boolAlert,
       }),
     }).then((response) => {
       login(username, password);
@@ -355,13 +362,12 @@ const HomeScreen = () => {
     fetch(`${SERVER_URL}/exchangeRate`)
       .then((response) => response.json())
       .then((data) => {
-
         if (data.usd_to_lbp >= ceiling) {
           sendEmail(userEmail, `USD price reached ${ceiling}!`);
         } else if (data.usd_to_lbp <= floor) {
           sendEmail(userEmail, `USD price reached ${floor}!`);
         }
-        
+
         setAuthState(States.PENDING);
       });
   }
@@ -369,13 +375,12 @@ const HomeScreen = () => {
     fetch(`${SERVER_URL}/exchangeRate`)
       .then((response) => response.json())
       .then((data) => {
-
         if (data.lbp_to_usd >= ceiling) {
           sendEmail(userEmail, `USD price reached ${ceiling}!`);
         } else if (data.lbp_to_usd <= floor) {
           sendEmail(userEmail, `USD price reached ${floor}!`);
         }
-        
+
         setAuthState(States.PENDING);
       });
   }
@@ -422,18 +427,18 @@ const HomeScreen = () => {
         idText="To: User Id"
       />
       <PriceAlertDialog
-      open={authState === States.ALERTUSD}
-      onClose={()=> setAuthState(States.PENDING)}
-      onSubmit={alertPriceUsd}
-      submitText="Alert"
-      title="Set Alert"
+        open={authState === States.ALERTUSD}
+        onClose={() => setAuthState(States.PENDING)}
+        onSubmit={alertPriceUsd}
+        submitText="Alert"
+        title="Set Alert"
       />
       <PriceAlertDialog
-      open={authState === States.ALERTLBP}
-      onClose={()=> setAuthState(States.PENDING)}
-      onSubmit={alertPriceLbp}
-      submitText="Alert"
-      title="Set Alert"
+        open={authState === States.ALERTLBP}
+        onClose={() => setAuthState(States.PENDING)}
+        onSubmit={alertPriceLbp}
+        submitText="Alert"
+        title="Set Alert"
       />
 
       <Snackbar
@@ -878,12 +883,18 @@ const HomeScreen = () => {
                 </Button>
               </Tooltip>
               <Tooltip title="alert when price reaches ...">
-                <Button onClick={() => setAuthState(States.ALERTUSD)} className="custom-button">
+                <Button
+                  onClick={() => setAuthState(States.ALERTUSD)}
+                  className="custom-button"
+                >
                   Alert USD
                 </Button>
               </Tooltip>
               <Tooltip title="alert when price reaches ...">
-                <Button onClick={() => setAuthState(States.ALERTLBP)} className="custom-button">
+                <Button
+                  onClick={() => setAuthState(States.ALERTLBP)}
+                  className="custom-button"
+                >
                   Alert LBP
                 </Button>
               </Tooltip>
@@ -891,10 +902,11 @@ const HomeScreen = () => {
           )}
         </div>
       )}
-      {userToken !== null && (
-        <div className="wrapper">
-          <h2>Record a recent transaction</h2>
-          <form name="transaction-entry">
+
+      <div className="wrapper">
+        <h2>Record a recent transaction</h2>
+        <form name="transaction-entry">
+          {userToken !== null && (
             <div className="amount-input">
               <label htmlFor="to-user">To: User Id</label>
               <TextField
@@ -904,45 +916,46 @@ const HomeScreen = () => {
                 onChange={(e) => setUserTransaction(e.target.value)}
               />
             </div>
-            <div className="amount-input">
-              <label htmlFor="lbp-amount">LBP Amount</label>
-              <TextField
-                id="lbp-amount"
-                type="number"
-                value={lbpInput}
-                onChange={(e) => setLbpInput(e.target.value)}
-              />
-            </div>
-            <div className="amount-input">
-              <label htmlFor="usd-amount">USD amount</label>
-              <TextField
-                id="usd-amount"
-                type="number"
-                value={usdInput}
-                onChange={(e) => setUsdInput(e.target.value)}
-              />
-            </div>
-          </form>
-          <select
-            id="transaction-type"
-            value={transactionType}
-            onChange={(e) => setTransactionType(e.target.value)}
-          >
-            <option value="usd-to-lbp">USD to LBP</option>
-            <option value="lbp-to-usd">LBP to USD</option>
-          </select>
-          <Button
-            id="add-button"
-            className="button"
-            type="button"
-            onClick={() => {
-              addItem();
-            }}
-          >
-            Add
-          </Button>
-        </div>
-      )}
+          )}
+          <div className="amount-input">
+            <label htmlFor="lbp-amount">LBP Amount</label>
+            <TextField
+              id="lbp-amount"
+              type="number"
+              value={lbpInput}
+              onChange={(e) => setLbpInput(e.target.value)}
+            />
+          </div>
+          <div className="amount-input">
+            <label htmlFor="usd-amount">USD amount</label>
+            <TextField
+              id="usd-amount"
+              type="number"
+              value={usdInput}
+              onChange={(e) => setUsdInput(e.target.value)}
+            />
+          </div>
+        </form>
+        <select
+          id="transaction-type"
+          value={transactionType}
+          onChange={(e) => setTransactionType(e.target.value)}
+        >
+          <option value="usd-to-lbp">USD to LBP</option>
+          <option value="lbp-to-usd">LBP to USD</option>
+        </select>
+        <Button
+          id="add-button"
+          className="button"
+          type="button"
+          onClick={() => {
+            addItem();
+          }}
+        >
+          Add
+        </Button>
+      </div>
+
       <script src="script.js"></script>
     </div>
   );

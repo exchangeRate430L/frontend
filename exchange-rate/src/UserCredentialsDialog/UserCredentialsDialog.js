@@ -3,8 +3,9 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import React, { useState } from "react";
+import DOMPurify from "dompurify";
 import "./UserCredentialsDialog.css";
-// Component that presents a dialog to collect credentials from the user
+
 export default function UserCredentialsDialog({
   open,
   onSubmit,
@@ -12,9 +13,24 @@ export default function UserCredentialsDialog({
   title,
   submitText,
 }) {
-  let [username, setUsername] = useState("");
-  let [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
+  const handleUsernameChange = (event) => {
+    const sanitizedValue = DOMPurify.sanitize(event.target.value);
+    setUsername(sanitizedValue);
+  };
+
+  const handlePasswordChange = (event) => {
+    const sanitizedValue = DOMPurify.sanitize(event.target.value);
+    setPassword(sanitizedValue);
+  };
+
+  const handleSubmit = () => {
+    const sanitizedUsername = DOMPurify.sanitize(username);
+    const sanitizedPassword = DOMPurify.sanitize(password);
+    onSubmit(sanitizedUsername, sanitizedPassword);
+  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
@@ -26,7 +42,7 @@ export default function UserCredentialsDialog({
             label="Username"
             type="text"
             value={username}
-            onChange={({ target: { value } }) => setUsername(value)}
+            onChange={handleUsernameChange}
           />
         </div>
         <div className="form-item">
@@ -35,14 +51,14 @@ export default function UserCredentialsDialog({
             label="Password"
             type="password"
             value={password}
-            onChange={({ target: { value } }) => setPassword(value)}
+            onChange={handlePasswordChange}
           />
         </div>
 
         <Button
           color="primary"
           variant="contained"
-          onClick={() => onSubmit(username, password)}
+          onClick={handleSubmit}
         >
           {submitText}
         </Button>
@@ -50,3 +66,4 @@ export default function UserCredentialsDialog({
     </Dialog>
   );
 }
+
